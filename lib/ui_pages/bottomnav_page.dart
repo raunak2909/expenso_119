@@ -1,6 +1,9 @@
+import 'package:expense_app/ui_pages/add_exp_page.dart';
+import 'package:expense_app/ui_pages/bottom_nav_page_provider.dart';
 import 'package:expense_app/ui_pages/home_page.dart';
 import 'package:expense_app/ui_pages/statistic_page.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BottomNavPage extends StatefulWidget{
   @override
@@ -10,18 +13,17 @@ class BottomNavPage extends StatefulWidget{
 }
 
 class BottomNavPageState extends State<StatefulWidget>{
-  int selectedindex=1;
   List<Widget> navTo=[
     HomePage(),
     StatiSticPage(),
-    Center(child: Text("Add Expenses")),
+    AddExpPage(),
     Center(child: Text("Notification")),
     Center(child: Text("Reward")),
   ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navTo[selectedindex],
+      body: navTo[context.watch<BottomNavPageProvider>().getBottomPageIndex()],
       bottomNavigationBar:BottomNavigationBar(items:[
         BottomNavigationBarItem(icon: Icon(Icons.home_filled ),label: " "),
         BottomNavigationBarItem(icon: Icon(Icons.bar_chart_rounded),label: " "),
@@ -30,7 +32,7 @@ class BottomNavPageState extends State<StatefulWidget>{
           height: 50,
           decoration: BoxDecoration(
               color: Colors.pinkAccent,
-            borderRadius: BorderRadius.circular(10)
+              borderRadius: BorderRadius.circular(10)
           ),
           child: Icon(Icons.add,color: Colors.white,),
         ),label: " "),
@@ -38,15 +40,13 @@ class BottomNavPageState extends State<StatefulWidget>{
         BottomNavigationBarItem(icon: Icon(Icons.grid_goldenratio),label: " "),
 
       ],
-      iconSize: 30,
+        iconSize: 30,
         selectedItemColor: Colors.pinkAccent,
         unselectedItemColor: Colors.grey,
-        currentIndex: selectedindex,
+        currentIndex: context.watch<BottomNavPageProvider>().getBottomPageIndex(),
         onTap: (value){
-        selectedindex=value;
-        setState(() {
-
-        });
+        print(value);
+          context.read<BottomNavPageProvider>().updateBottomNavPage(value);
         },
       ) ,
     );

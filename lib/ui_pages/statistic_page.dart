@@ -1,5 +1,10 @@
+import 'package:expense_app/ui_pages/home_page.dart';
 import 'package:expense_app/utils/app_styling.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'bloc/expense_bloc.dart';
 
 class StatiSticPage extends StatelessWidget{
   @override
@@ -109,6 +114,85 @@ class StatiSticPage extends StatelessWidget{
                 width: double.infinity,
                 height: 250,
                 color: Colors.pink,
+                child: BlocBuilder<ExpenseBloc, ExpenseState>(builder: (_, state) {
+                if (state is ExpenseLoadingState) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (state is ExpenseErrorState) {
+                  return Center(
+                    child: Text(state.errorMsg),
+                  );
+                }
+
+                if (state is ExpenseLoadedState) {
+                  var allData = HomePageState.filterExpense(state.mExp);
+                  if(state.mExp.isNotEmpty){
+
+                    List<BarChartGroupData> mBars = [];
+
+                    for(int i = 0; i<allData.length; i++){
+                      mBars.add(BarChartGroupData(x: i, barRods: [
+                        BarChartRodData(toY: allData[i].totalAmt.toDouble()),
+                      ]));
+                    }
+
+                    return BarChart(
+                        BarChartData(
+                      barTouchData: BarTouchData(
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipColor: (_) => Colors.blueGrey,
+                          tooltipHorizontalAlignment: FLHorizontalAlignment.right,
+                          tooltipMargin: -10,
+                          getTooltipItem: (group, groupIndex, rod, rodIndex){
+                            String toolTipName = allData[group.x].title;
+                            return BarTooltipItem(toolTipName, const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),);
+                          }
+                        ),
+                      ),
+                      titlesData: FlTitlesData(
+                        show: true,
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta){
+                              return SideTitleWidget(
+                                axisSide: meta.axisSide,
+                                space: 16,
+                                child: Text(allData[value.toInt()].title),
+                              );
+                            },
+                            reservedSize: 38,
+                          ),
+                        ),
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: false,
+                          ),
+                        ),
+                      ),
+                      barGroups: mBars,
+                    ));
+                  } else {
+                    return Center(
+                      child: Text('No Expense yet!!'),
+                    );
+                  }
+                }
+                return Container();
+              }),
               ),
               SizedBox(height: 15,),
               ///Spending Title Text..
